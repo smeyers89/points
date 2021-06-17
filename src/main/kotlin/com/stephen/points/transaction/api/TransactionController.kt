@@ -38,10 +38,10 @@ class TransactionController(
     fun deductPoints(
         @PathVariable userId: String,
         @RequestBody pointsDto: PointsDto
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<Map<String, Int?>> {
 
-        service.deductPoints(userId, pointsDto.points)
+        val pointBalances = service.deductPoints(userId, pointsDto.points)
 
-        return ResponseEntity(HttpStatus.NO_CONTENT)
+        return ResponseEntity.ok().body(pointBalances)
     }
 }

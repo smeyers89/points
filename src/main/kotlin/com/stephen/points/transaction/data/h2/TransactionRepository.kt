@@ -17,8 +17,13 @@ class TransactionRepository(
         entityManager.persist(transaction)
     }
 
-    fun getTransactionByUserId(userId: String): List<Transaction> {
-        val query = entityManager.createNativeQuery("SELECT * FROM TRANSACTIONS")
+    fun getTransactionsByUserId(userId: String): List<Transaction> {
+        val query = entityManager.createNativeQuery(
+            """
+                SELECT * FROM TRANSACTIONS
+                WHERE USER_ID='$userId'
+            """
+        )
         val resultList = query.resultList.toList()
         return resultList.map {
             it as Array<out Any?>
@@ -31,5 +36,18 @@ class TransactionRepository(
                 userId = it[4] as String
             )
         }
+    }
+
+    @Transactional
+    fun updateTransactionPoints(transactionId: String, points: Int) {
+        val query =
+            entityManager.createNativeQuery(
+                """
+               UPDATE TRANSACTIONS
+               SET POINTS=$points
+               WHERE TRANSACTION_ID='$transactionId'
+            """
+            )
+        query.executeUpdate()
     }
 }
