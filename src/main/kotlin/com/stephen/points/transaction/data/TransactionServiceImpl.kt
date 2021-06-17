@@ -59,7 +59,6 @@ class TransactionServiceImpl(
             .filter { it.points > 0 }
 
         if (!validateCurrentPoints(transactions, points)) {
-            // User does not have enough points to cover this transaction request.
             throw ResponseStatusException(
                 HttpStatus.UNPROCESSABLE_ENTITY, "User does not have enough points to cover transaction"
             )
