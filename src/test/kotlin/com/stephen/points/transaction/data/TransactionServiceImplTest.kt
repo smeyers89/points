@@ -9,6 +9,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
+import org.springframework.web.server.ResponseStatusException
 
 internal class TransactionServiceImplTest {
     private lateinit var serviceUnderTest: TransactionServiceImpl
@@ -75,22 +76,26 @@ internal class TransactionServiceImplTest {
     fun `deductPoints() handles a user with no transactions`() {
 
         // Arrange
-        val expectedRemainingBalance = emptyMap<String, Int?>()
+        var exceptionMessage = ""
 
         whenever(mockTransactionRepository.getTransactionsByUserId(userId)).doReturn(emptyList())
 
         // Act
-        val remainingBalance = serviceUnderTest.deductPoints(userId, 1_000)
+        try {
+            serviceUnderTest.deductPoints(userId, 1_000)
+        } catch (ex: ResponseStatusException) {
+            exceptionMessage = ex.reason ?: ""
+        }
 
         // Assert
-        Assertions.assertThat(remainingBalance).isEqualTo(expectedRemainingBalance)
+        Assertions.assertThat(exceptionMessage).isEqualTo("User does not have enough points to cover transaction")
     }
 
     @Test
     fun `deductPoints() handles user with insufficient points`() {
 
         // Arrange
-        val expectedRemainingBalance = emptyMap<String, Int?>()
+        var exceptionMessage = ""
 
         whenever(
             mockTransactionRepository.getTransactionsByUserId(userId)
@@ -105,10 +110,14 @@ internal class TransactionServiceImplTest {
         doNothing().whenever(mockTransactionRepository).updateTransactionPoints(anyString(), anyInt())
 
         // Act
-        val remainingBalance = serviceUnderTest.deductPoints(userId, 1_000)
+        try {
+            serviceUnderTest.deductPoints(userId, 1_000)
+        } catch (ex: ResponseStatusException) {
+            exceptionMessage = ex.reason ?: ""
+        }
 
         // Assert
-        Assertions.assertThat(remainingBalance).isEqualTo(expectedRemainingBalance)
+        Assertions.assertThat(exceptionMessage).isEqualTo("User does not have enough points to cover transaction")
     }
 
     @Test

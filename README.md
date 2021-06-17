@@ -34,6 +34,11 @@ Example POST payloads:
 { "payer": "MILLER COORS", "points": 10000, "timestamp": "2020-11-01T14:00:00Z" }
 { "payer": "DANNON", "points": 300, "timestamp": "2020-10-31T10:00:00Z" }
 ```
+Example POST Responses:
+```
+204 no-content (success)
+422 unprocessable entity (failure) - message includes which payer would result in negative balance
+```
 
 ---
 
@@ -43,4 +48,10 @@ PATCH localhost:8080/transaction/{userId} (Spending points for a user)
 Example PATCH payloads:
 ```
 { "points": 5000 }
+```
+
+Example PATCH Responses:
+```
+204 no-content (success)
+422 unprocessable entity (failure) - message includes that the transaction would result in negative balance for user
 ```

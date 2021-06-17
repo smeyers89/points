@@ -4,7 +4,9 @@ import com.stephen.points.transaction.data.h2.TransactionRepository
 import com.stephen.points.transaction.domain.Transaction
 import com.stephen.points.transaction.domain.TransactionService
 import com.stephen.points.transaction.dto.TransactionDto
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @Service
@@ -31,7 +33,12 @@ class TransactionServiceImpl(
             validatePositivePoints(
                 transactionRepository.getTransactionsByUserIdAndPayer(userId, transactionDto.payer),
                 transactionDto.points
-            ).let { valid -> if (!valid) return }
+            ).let { valid ->
+                if (!valid) throw ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "${transactionDto.payer} does not have enough points to cover transaction"
+                )
+            }
         }
 
         transactionRepository.saveTransaction(
@@ -53,7 +60,9 @@ class TransactionServiceImpl(
 
         if (!validateCurrentPoints(transactions, points)) {
             // User does not have enough points to cover this transaction request.
-            return emptyMap()
+            throw ResponseStatusException(
+                HttpStatus.UNPROCESSABLE_ENTITY, "User does not have enough points to cover transaction"
+            )
         }
 
         var currentPoints = points
