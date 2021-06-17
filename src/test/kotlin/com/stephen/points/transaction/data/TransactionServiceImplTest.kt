@@ -142,4 +142,36 @@ internal class TransactionServiceImplTest {
         // Assert
         Assertions.assertThat(valid).isFalse
     }
+
+    @Test
+    fun `validatePositivePoints() returns true if a balance is sufficient to cover the point deduction`() {
+
+        // Arrange
+        val transactions = listOf(
+            Transaction("transaction-1", userId, testPayerOne, 100, "time.now()"),
+            Transaction("transaction-2", userId, testPayerTwo, 200, "time.now()")
+        )
+
+        // Act
+        val valid = serviceUnderTest.validatePositivePoints(transactions, -100)
+
+        // Assert
+        Assertions.assertThat(valid).isTrue
+    }
+
+    @Test
+    fun `validatePositivePoints() returns false if a point deduction would result in a negative balance`() {
+
+        // Arrange
+        val transactions = listOf(
+            Transaction("transaction-1", userId, testPayerOne, 100, "time.now()"),
+            Transaction("transaction-2", userId, testPayerTwo, 200, "time.now()")
+        )
+
+        // Act
+        val valid = serviceUnderTest.validatePositivePoints(transactions, -1_000)
+
+        // Assert
+        Assertions.assertThat(valid).isFalse
+    }
 }

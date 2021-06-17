@@ -26,6 +26,14 @@ class TransactionServiceImpl(
 
     override fun saveTransaction(userId: String, transactionDto: TransactionDto) {
 
+        // On point deduction transactions, ensure we don't dip a payer into a negative point balance
+        if (transactionDto.points < 0) {
+            validatePositivePoints(
+                transactionRepository.getTransactionsByUserIdAndPayer(userId, transactionDto.payer),
+                transactionDto.points
+            ).let { valid -> if (!valid) return }
+        }
+
         transactionRepository.saveTransaction(
             Transaction(
                 transactionId = UUID.randomUUID().toString(),
@@ -94,6 +102,14 @@ class TransactionServiceImpl(
 
     fun validateCurrentPoints(transactions: List<Transaction>, points: Int): Boolean {
         if (transactions.sumOf { it.points } < points) {
+            return false
+        }
+
+        return true
+    }
+
+    fun validatePositivePoints(transactions: List<Transaction>, points: Int): Boolean {
+        if ((transactions.sumOf { it.points } + points) < 0) {
             return false
         }
 

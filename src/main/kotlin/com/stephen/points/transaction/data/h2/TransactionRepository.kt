@@ -17,14 +17,7 @@ class TransactionRepository(
         entityManager.persist(transaction)
     }
 
-    fun getTransactionsByUserId(userId: String): List<Transaction> {
-        val query = entityManager.createNativeQuery(
-            """
-                SELECT * FROM TRANSACTIONS
-                WHERE USER_ID='$userId'
-            """
-        )
-        val resultList = query.resultList.toList()
+    fun queryResultToTransactions(resultList: List<Any?>): List<Transaction> {
         return resultList.map {
             it as Array<out Any?>
 
@@ -36,6 +29,29 @@ class TransactionRepository(
                 userId = it[4] as String
             )
         }
+    }
+
+    fun getTransactionsByUserIdAndPayer(userId: String, payer: String): List<Transaction> {
+        val query = entityManager.createNativeQuery(
+            """
+                SELECT * FROM TRANSACTIONS
+                WHERE USER_ID='$userId'
+                AND PAYER='$payer'
+            """
+        )
+        val resultList = query.resultList.toList()
+        return queryResultToTransactions(resultList)
+    }
+
+    fun getTransactionsByUserId(userId: String): List<Transaction> {
+        val query = entityManager.createNativeQuery(
+            """
+                SELECT * FROM TRANSACTIONS
+                WHERE USER_ID='$userId'
+            """
+        )
+        val resultList = query.resultList.toList()
+        return queryResultToTransactions(resultList)
     }
 
     @Transactional
