@@ -59,7 +59,10 @@ class TransactionServiceImpl(
             val transaction = transactions[index]
 
             if (transaction.points >= currentPoints) {
-                transactionRepository.updateTransactionPoints(transaction.transactionId, transaction.points - currentPoints)
+                transactionRepository.updateTransactionPoints(
+                    transaction.transactionId,
+                    transaction.points - currentPoints
+                )
 
                 // Show the "spent" points back to the caller.
                 spentTransactions.add(transaction.copy(points = currentPoints.unaryMinus()))
